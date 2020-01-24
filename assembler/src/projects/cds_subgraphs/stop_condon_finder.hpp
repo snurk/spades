@@ -26,9 +26,6 @@ void hash_combine(size_t &seed, T const &key) {
 using EdgePath = omnigraph::Path<EdgeId>;
 using CodonSet = std::vector<Sequence>;
 
-extern CodonSet STOP_CODONS;
-extern CodonSet RC_STOP_CODONS;
-
 //EdgeId + offset pair
 using GraphPos = std::pair<EdgeId, size_t>;
 

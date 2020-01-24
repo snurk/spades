@@ -10,16 +10,6 @@
 
 namespace cds_subgraphs {
 
-static CodonSet RC(const CodonSet &codons) {
-    CodonSet rc(codons.size());
-    std::transform(codons.begin(), codons.end(), rc.begin(),
-                   [](const Sequence &s) {return !s;});
-    return rc;
-}
-
-CodonSet STOP_CODONS = {Sequence("TAG"), Sequence("TAA"), Sequence("TGA")};
-CodonSet RC_STOP_CODONS = RC(STOP_CODONS);
-
 void CodonFinder::NextToQueue(FramedPos fpos) {
     if (fpos.last(g_)) {
         for (EdgeId e : g_.OutgoingEdges(g_.EdgeEnd(fpos.e))) {

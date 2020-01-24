@@ -145,8 +145,22 @@ public:
                                                        const DistInfo &ends) const;
 };
 
+inline CodonSet RCCodons(const CodonSet &codons) {
+    CodonSet rc(codons.size());
+    std::transform(codons.begin(), codons.end(), rc.begin(),
+                   [](const Sequence &s) {return !s;});
+    return rc;
+}
+
+inline CodonSet StopCodons(bool reduced_set) {
+    return reduced_set ? CodonSet{Sequence("TAG"), Sequence("TAA")}
+        : CodonSet{Sequence("TAG"), Sequence("TAA"), Sequence("TGA")};
+}
+
 class PartialGenePathProcessor {
     const Graph &g_;
+    const CodonSet stop_codons_;
+    const CodonSet rc_stop_codons_;
     const MinDistRelevantComponentFinder rel_comp_finder_;
     const io::EdgeNamingF<Graph> edge_naming_f_;
 
@@ -224,9 +238,12 @@ class PartialGenePathProcessor {
 
 public:
     PartialGenePathProcessor(const Graph &g,
+                             bool reduced_stop_set,
                              io::EdgeNamingF<Graph> edge_naming_f,
                              double max_len_coeff = 1.5) :
             g_(g),
+            stop_codons_(StopCodons(reduced_stop_set)),
+            rc_stop_codons_(RCCodons(stop_codons_)),
             rel_comp_finder_(g_, edge_naming_f, max_len_coeff),
             edge_naming_f_(edge_naming_f) {}
 

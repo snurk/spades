@@ -166,10 +166,11 @@ static void WriteComponent(const GraphComponent<Graph> &component, const std::st
 void ExtractCDSSubgraphs(const conj_graph_pack &gp,
                          const GeneInitSeq &starting_seqs,
                          const std::unordered_map<std::string, size_t> &cds_len_ests,
+                         bool reduced_stop_set,
                          const io::EdgeNamingF<Graph> &edge_naming_f,
                          const std::string &out_folder) {
     //fixme rename
-    PartialGenePathProcessor partial_path_processor(gp.g, edge_naming_f);
+    PartialGenePathProcessor partial_path_processor(gp.g, reduced_stop_set, edge_naming_f);
     auto mapper = MapperInstance(gp);
     CDSSubgraphExtractor subgraph_extractor(gp.g, *mapper, partial_path_processor);
     INFO("Searching relevant subgraphs in parallel for all partial predictions");
@@ -204,10 +205,11 @@ void ExtractCDSSubgraphs(const conj_graph_pack &gp,
 void ParallelExtractCDSSubgraphs(const conj_graph_pack &gp,
                                  const GeneInitSeq &starting_seqs,
                                  const std::unordered_map<std::string, size_t> &cds_len_ests,
+                                 bool reduced_stop_set,
                                  const io::EdgeNamingF<Graph> &edge_naming_f,
                                  const std::string &out_folder) {
     //fixme rename
-    PartialGenePathProcessor partial_path_processor(gp.g, edge_naming_f);
+    PartialGenePathProcessor partial_path_processor(gp.g, reduced_stop_set, edge_naming_f);
     auto mapper = MapperInstance(gp);
     CDSSubgraphExtractor subgraph_extractor(gp.g, *mapper, partial_path_processor);
     INFO("Searching relevant subgraphs in parallel for all partial predictions");
@@ -266,6 +268,7 @@ void ParallelExtractCDSSubgraphs(const conj_graph_pack &gp,
 struct gcfg {
     gcfg()
             : k(0),
+              reduced_stop_set(false),
               nthreads(omp_get_max_threads() / 2 + 1)
     {}
 
@@ -276,6 +279,7 @@ struct gcfg {
     std::string genes_desc;
     std::string genes_seq;
     std::string cds_len_fn;
+    bool reduced_stop_set;
     unsigned nthreads;
 };
 
@@ -290,6 +294,8 @@ static void process_cmdline(int argc, char **argv, gcfg &cfg) {
                     (required("--cds-len-est") & value("file", cfg.cds_len_fn)) % "file with cds length estimamtes",
                     (required("-k") & integer("value", cfg.k)) % "k-mer length to use",
                     (option("-t", "--threads") & integer("value", cfg.nthreads)) % "# of threads to use (default: max_threads / 2)",
+                    (option("-t", "--threads") & integer("value", cfg.nthreads)) % "# of threads to use (default: max_threads / 2)",
+                    (option("--reduced-stop-set").set(cfg.reduced_stop_set, true)) % "use reduced stop codon set (exclude TGA)",
                     (option("--tmpdir") & value("dir", cfg.tmpdir)) % "scratch directory to use (default: <outdir>/tmp)"
     );
 
@@ -345,10 +351,12 @@ int main(int argc, char** argv) {
         static const bool parallel = false;
         if (parallel) {
             //Experimental parallel mode
-            cds_subgraphs::ParallelExtractCDSSubgraphs(gp, starting_seqs, cds_len_ests,
+            cds_subgraphs::ParallelExtractCDSSubgraphs(gp, starting_seqs,
+                              cds_len_ests, cfg.reduced_stop_set,
                               label_helper.edge_naming_f(), out_folder);
         } else {
-            cds_subgraphs::ExtractCDSSubgraphs(gp, starting_seqs, cds_len_ests,
+            cds_subgraphs::ExtractCDSSubgraphs(gp, starting_seqs,
+                              cds_len_ests, cfg.reduced_stop_set,
                               label_helper.edge_naming_f(), out_folder);
         }
 

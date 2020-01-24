@@ -173,7 +173,7 @@ PartialGenePathProcessor::ProcessPartialGenePath(const EdgePath &gene_path,
 
     INFO("Searching for stop codon forward");
     EdgeId last_e = gene_path.sequence().back();
-    CodonFinder fwd_finder(g_, GraphPos(last_e, gene_path.end_pos() - 1), STOP_CODONS);
+    CodonFinder fwd_finder(g_, GraphPos(last_e, gene_path.end_pos() - 1), stop_codons_);
     auto paths_fwd = fwd_finder.Go();
     INFO("Codons forward found: " << paths_fwd.size());
     auto ends = fwd_finder.Terminates(paths_fwd);
@@ -195,7 +195,7 @@ PartialGenePathProcessor::ProcessPartialGenePath(const EdgePath &gene_path,
     INFO("Searching for stop codon backward");
     EdgeId first_e = gene_path.sequence().front();
     CodonFinder bwd_finder(g_, GraphPos(g_.conjugate(first_e), g_.length(first_e) - gene_path.start_pos() - 1),
-                           RC_STOP_CODONS);
+                           rc_stop_codons_);
     auto paths_bwd = bwd_finder.Go();
     INFO("Codons backward found: " << paths_bwd.size());
     auto starts = RCTerminates(bwd_finder.Terminates(paths_bwd));
