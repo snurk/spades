@@ -94,7 +94,7 @@ static void process_cmdline(int argc, char **argv, gcfg &cfg) {
 
   auto cli = (
       cfg.file << value("dataset description (in YAML)"),
-      cfg.graph << value("graph (in GFA)"),
+      cfg.graph << value("graph (in GFA or prefix of the SPAdes binary saves)"),
       cfg.outfile << value("output filename"),
       (option("-k") & integer("value", cfg.k)) % "k-mer length to use",
       (option("-t", "--threads") & integer("value", cfg.nthreads)) % "# of threads to use",
