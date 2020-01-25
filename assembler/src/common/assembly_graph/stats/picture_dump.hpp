@@ -26,6 +26,7 @@
 #include "io/reads/wrapper_collection.hpp"
 #include "io/reads/osequencestream.hpp"
 #include "io/dataset_support/dataset_readers.hpp"
+#include "io/graph/gfa_writer.hpp"
 #include "utils/filesystem/copy_file.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -289,13 +290,15 @@ struct detail_info_printer {
                   << stats.edges() << ", sum length of edges : " << stats.edge_length());
         }
 
-        if (config.save_graph_pack) {
+        if (cfg::get().main_iteration && config.save_graph_pack) {
             auto saves_folder = fs::append_path(fs::append_path(folder_, "saves/"),
                                                 ToString(call_cnt++, 2) + "_" + pos_name + "/");
             fs::make_dirs(saves_folder);
             BasePackIO<Graph>().Save(saves_folder + "graph_pack", gp_);
-            //TODO: separate
-            Save(saves_folder + "graph_pack", gp_.clustered_indices);
+
+            std::ofstream f(saves_folder + "graph_pack.gfa");
+            gfa::GFAWriter gfa_writer(gp_.g, f);
+            gfa_writer.WriteSegmentsAndLinks();
         }
 
         if (config.save_all) {

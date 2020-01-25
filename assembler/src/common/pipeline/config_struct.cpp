@@ -777,8 +777,9 @@ void load_cfg(debruijn_config &cfg, boost::property_tree::ptree const &pt,
     load(cfg.info_printers, pt, "info_printers", complete);
 
     if (save_gp) {
-        INFO("Graph pack will be saved before repeat resolution");
+        INFO("Graph pack will be saved before repeat resolution and simplification");
         cfg.info_printers[info_printer_pos::before_repeat_resolution].save_graph_pack = true;
+        cfg.info_printers[info_printer_pos::before_simplification].save_graph_pack = true;
     }
 
     load(cfg.bwa, pt, "bwa_aligner", complete);
