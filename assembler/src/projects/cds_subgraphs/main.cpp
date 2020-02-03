@@ -348,6 +348,12 @@ int main(int argc, char** argv) {
 
         auto cds_len_ests = cds_subgraphs::CDSLengthsFromFile(cfg.cds_len_fn);
 
+        if (cfg.reduced_stop_set) {
+            INFO("Using reduced stop codon set (TGA is coding)");
+        } else {
+            INFO("Using standard stop codon set");
+        }
+
         static const bool parallel = false;
         if (parallel) {
             //Experimental parallel mode
